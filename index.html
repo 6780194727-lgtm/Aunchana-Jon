@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Self Discovery Quiz</title>
+  <title>Journey to the Future You</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -361,7 +361,7 @@
     app.innerHTML = `
       <div class="card">
         <div class="intro-title">แบบทดสอบค้นหาตัวตน</div>
-        <div class="intro-subtitle">Self Discovery Quiz</div>
+        <div class="intro-subtitle">Journey to the Future You</div>
         <div class="intro-text">
           แบบทดสอบนี้จะชวนคุณเดินทางผ่าน “หนึ่งวันในชีวิตของคุณ”<br/>
           แต่ละคำถามสะท้อนตัวตน มุมมอง และวิธีคิดของคุณในแบบที่เป็นคุณจริงๆ<br/><br/>
@@ -532,23 +532,42 @@
   }
 
   function submitRating() {
-    const feedback = (document.getElementById("feedback") || {}).value || "";
+  const feedback = (document.getElementById("feedback") || {}).value.trim();
+
+  const payload = {
+    rating: ratingValue,
+    comment: feedback
+  };
+
+  const scriptURL = "https://script.google.com/macros/s/AKfycbw2teCiNtYtJZbSwdHdhZJaBwiPmaUDSOb1dKme29gWi6McWziWCJ8R-FGQTC75wdocAQ/exec";
+
+  fetch(scriptURL, {
+    method: "POST",
+    mode: "no-cors", // สำคัญมาก
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    // ทำ UI ขอบคุณ
     app.innerHTML = `
       <div class="card">
         <div class="thankyou">
           <div style="font-size:60px; margin-bottom:10px;">🙏</div>
-          ขอบคุณสำหรับการทำแบบทดสอบและการให้คะแนน (${ratingValue} ดาว)<br/>
-          ข้อเสนอแนะของคุณมีคุณค่ามากในการพัฒนาต่อไป 💛
+          ขอบคุณสำหรับการให้คะแนน (${ratingValue} ดาว)<br/>
+          ระบบได้บันทึกคำตอบของคุณแล้ว 💛
         </div>
         <div class="result-buttons" style="margin-top:28px;">
           <button class="btn-pill btn-primary" onclick="restart()">ทำแบบทดสอบอีกครั้ง</button>
-          <button class="btn-pill btn-outline" onclick="view='intro'; renderApp()">กลับไปหน้าแรก</button>
+          <button class="btn-pill btn-outline" onclick="view='intro'; renderApp()">กลับหน้าแรก</button>
         </div>
       </div>
     `;
-    // ถ้าภายหลังอยากส่ง rating/feedback ไปเก็บที่ server ก็ทำได้ที่นี่
-    console.log("Rating:", ratingValue, "Feedback:", feedback.trim());
-  }
+  })
+  .catch(err => {
+    console.error("ERROR:", err);
+    alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
+  });
+}
 
   // ---------- Restart ----------
   function restart() {
